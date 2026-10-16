@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D AUTOS | Drive Your Dream</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0B1F3A;
+      color: #FFFFFF;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 8%;
+      border-bottom: 1px solid #34445B;
+    }
+
+    .logo {
+      font-size: 27px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      color: #C0C7D1;
+    }
+
+    nav a {
+      color: #FFFFFF;
+      text-decoration: none;
+      margin-left: 22px;
+      font-size: 14px;
+    }
+
+    nav a:hover {
+      color: #C0C7D1;
+    }
+
+    .hero {
+      min-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(135deg, #0B1F3A, #172E4D);
+    }
+
+    .tag {
+      color: #C0C7D1;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      font-size: 12px;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 8vw, 76px);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    h1 span {
+      color: #C0C7D1;
+    }
+
+    .hero p {
+      color: #CFD6E0;
+      font-size: 17px;
+      line-height: 1.8;
+      max-width: 500px;
+      margin-bottom: 32px;
+    }
+
+    .button {
+      display: inline-block;
+      background: #C0C7D1;
+      color: #0B1F3A;
+      padding: 15px 28px;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    .button:hover {
+      background: #FFFFFF;
+    }
+
+    .section {
+      padding: 70px 8%;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+
+    .section > p {
+      color: #CFD6E0;
+      line-height: 1.8;
+    }
+
+    .line {
+      width: 55px;
+      height: 3px;
+      background: #C0C7D1;
+      margin: 20px auto 30px;
+    }
+
+    .car-placeholder {
+      max-width: 650px;
+      margin: 35px auto 0;
+      padding: 35px 20px;
+      border: 1px solid #46566B;
+      border-radius: 8px;
+      background: #112642;
+    }
+
+    .car-placeholder p {
+      color: #CFD6E0;
+      line-height: 1.8;
+    }
+
+    .contact {
+      background: #112642;
+    }
+
+    .contact .button {
+      margin-top: 25px;
+    }
+
+    footer {
+      padding: 25px 15px;
+      text-align: center;
+      color: #AEB9C8;
+      font-size: 13px;
+      border-top: 1px solid #34445B;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      nav a {
+        margin: 0 8px;
+      }
+
+      .section {
+        padding: 55px 6%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">D AUTOS.</div>
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#cars">Cars</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <div class="tag">Your Journey Starts Here</div>
+
+    <h1>Drive Your<br><span>Dream.</span></h1>
+
+    <p>
+      Discover your next car with D Autos.
+      Quality vehicles, a smooth buying experience,
+      and a car that feels right for you.
+    </p>
+
+    <a class="button" href="#cars">Explore Our Cars</a>
+  </section>
+
+  <section class="section" id="cars">
+    <h2>Find Your Next Car</h2>
+    <div class="line"></div>
+
+    <p>We're getting our featured vehicles ready for you.</p>
+
+    <div class="car-placeholder">
+      <h3>Something Great Is Coming</h3>
+      <br>
+      <p>
+        Our available cars will appear here.
+        Contact us to ask about vehicles for sale.
+      </p>
+    </div>
+  </section>
+
+  <section class="section contact" id="contact">
+    <h2>Let's Get You Moving</h2>
+    <div class="line"></div>
+
+    <p>Have a car in mind? Get in touch with D Autos.</p>
+
+    <a class="button"
+       href="https://wa.me/"
+       target="_blank"
+       rel="noopener noreferrer">
+      Contact Us
+    </a>
+  </section>
+
+  <footer>
+    © 2026 D Autos. All rights reserved.
+  </footer>
+
+</body>
+</html>
+
