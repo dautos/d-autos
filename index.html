@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#171819">
+  <meta name="description" content="D AUTOS — Discover premium vehicles and find your next drive.">
+  <title>D AUTOS | Drive Different</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <header class="navbar">
+    <a href="#home" class="brand" aria-label="D AUTOS home">
+      <span class="brand-mark">D</span>
+      <span class="brand-name">D <span>AUTOS</span></span>
+    </a>
+
+    <button class="menu-toggle" aria-label="Toggle navigation"
+      aria-expanded="false" aria-controls="nav-links">
+      <span></span><span></span>
+    </button>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="#home" class="nav-link active">Home</a>
+      <a href="#inventory" class="nav-link">Our Cars</a>
+      <a href="#about" class="nav-link">About</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+
+    <a href="cars.html" class="nav-cta">Explore Cars <span>↗</span></a>
+  </header>
+
+  <main>
+    <section class="screen hero" id="home">
+      <div class="watermark" aria-hidden="true">D</div>
+
+      <div class="hero-copy reveal">
+        <p class="eyebrow"><span class="status-dot"></span> YOUR NEXT DRIVE STARTS HERE</p>
+        <h1>DRIVE<br><span>DIFFERENT.</span></h1>
+        <p class="hero-description">
+          Exceptional cars. Unmistakable presence.
+          Find the machine that matches your ambition.
+        </p>
+
+        <div class="hero-actions">
+          <a href="cars.html" class="button button-light">Explore Collection <span>↗</span></a>
+          <a href="#about" class="text-link">Discover D AUTOS <span>→</span></a>
+        </div>
+
+        <div class="hero-stats">
+          <div><strong>PREMIUM</strong><span>Vehicle selection</span></div>
+          <div><strong>PERSONAL</strong><span>Customer service</span></div>
+          <div><strong>DRIVE</strong><span>Your next chapter</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal">
+        <div class="image-frame">
+          <img
+            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1800&q=85"
+            alt="Premium sports car"
+            class="hero-car"
+          >
+          <div class="image-shade"></div>
+          <span class="image-index">D / 001</span>
+          <div class="image-caption">
+            <span>THE ART OF DRIVING</span>
+            <span class="caption-line"></span>
+          </div>
+        </div>
+        <div class="visual-note">DESIGNED FOR THE DRIVE.</div>
+      </div>
+
+      <a href="#inventory" class="scroll-cue"><span></span> SCROLL TO EXPLORE</a>
+      <span class="hero-coordinate">LAGOS, NIGERIA</span>
+    </section>
+
+    <section class="screen inventory" id="inventory">
+      <div class="section-watermark" aria-hidden="true">DA</div>
+
+      <div class="section-heading reveal">
+        <div>
+          <p class="eyebrow">01 / THE COLLECTION</p>
+          <h2>FIND YOUR<br><span>NEXT DRIVE.</span></h2>
+        </div>
+        <p class="section-intro">
+          Every car has a character. Discover a style
+          that feels unmistakably yours.
+        </p>
+      </div>
+
+      <div class="car-grid">
+        <article class="car-card reveal">
+          <div class="car-image">
+            <img src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1000&q=80"
+              alt="Luxury Mercedes-Benz vehicle" loading="lazy">
+            <span class="car-number">01</span>
+          </div>
+          <div class="car-details">
+            <div><p class="car-category">LUXURY</p><h3>Mercedes-Benz</h3></div>
+            <a href="#contact" class="round-arrow" aria-label="Enquire about Mercedes-Benz">↗</a>
+          </div>
+        </article>
+
+        <article class="car-card reveal">
+          <div class="car-image">
+            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=80"
+              alt="BMW performance car" loading="lazy">
+            <span class="car-number">03</span>
+          </div>
+          <div class="car-details">
+            <div><p class="car-category">PERFORMANCE</p><h3>BMW</h3></div>
+            <a href="#contact" class="round-arrow" aria-label="Enquire about BMW">↗</a>
+          </div>
+        </article>
+
+        <article class="car-card reveal">
+          <div class="car-image">
+            <img src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1000&q=80"
+              alt="Audi luxury vehicle" loading="lazy">
+            <span class="car-number">03</span>
+          </div>
+          <div class="car-details">
+            <div><p class="car-category">CONTEMPORARY</p><h3>Audi</h3></div>
+            <a href="#contact" class="round-arrow" aria-label="Enquire about Audi">↗</a>
+          </div>
+        </article>
+      </div>
+
+      <p class="inventory-note">VEHICLES SHOWN ARE DESIGN EXAMPLES. ASK US ABOUT CURRENT AVAILABILITY.</p>
+    </section>
+
+    <section class="screen about" id="about">
+      <div class="watermark about-watermark" aria-hidden="true">D</div>
+
+      <div class="about-image reveal">
+        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=85"
+          alt="Sculpted sports car detail" loading="lazy">
+        <span class="about-image-label">BEYOND THE ORDINARY.</span>
+      </div>
+
+      <div class="about-copy reveal">
+        <p class="eyebrow">02 / OUR PHILOSOPHY</p>
+        <h2>MORE THAN<br>A <span>MACHINE.</span></h2>
+        <p>
+          The right car is more than transportation.
+          It's confidence, character and the feeling
+          you get every time you take the wheel.
+        </p>
+        <p>
+          At D AUTOS, we're here to help you find a
+          vehicle that fits your taste, your lifestyle
+          and the road ahead.
+        </p>
+        <a href="#contact" class="button button-outline">Let's Find Your Car <span>↗</span></a>
+      </div>
+    </section>
+
+    <section class="screen contact" id="contact">
+      <div class="watermark contact-watermark" aria-hidden="true">DA</div>
+
+      <div class="contact-content reveal">
+        <p class="eyebrow">03 / YOUR NEXT MOVE</p>
+        <h2>YOUR NEXT CAR<br><span>STARTS HERE.</span></h2>
+        <p>Tell us what you're looking for. Let's find the right car for you.</p>
+
+        <div class="contact-actions">
+          <a href="#" class="button button-light" id="whatsapp-link">
+            Chat on WhatsApp <span>↗</span>
+          </a>
+          <a href="#" class="button button-outline" id="call-link">
+            Call D AUTOS <span>↗</span>
+          </a>
+        </div>
+
+        <p class="contact-reminder">PERSONAL SERVICE. YOUR NEXT DRIVE.</p>
+      </div>
+
+      <footer class="footer">
+        <a href="#home" class="footer-brand">D AUTOS<span>®</span></a>
+        <p>© <span id="year"></span> D  AUTOS. ALL RIGHTS RESERVED.</p>
+        <a href="#home" class="back-top">BACK TO TOP ↑</a>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>

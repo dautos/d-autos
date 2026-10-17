@@ -1,0 +1,950 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090a0d">
+  <title>D AUTOS | Admin Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #090a0d;
+      --panel: #12141a;
+      --panel2: #191c23;
+      --red: #e63946;
+      --white: #f5f5f5;
+      --muted: #9296a1;
+      --border: #292c35;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .layout { display: flex; min-height: 100vh; }
+
+    aside {
+      width: 245px;
+      padding: 30px 20px;
+      background: #0e1015;
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .brand span { color: var(--red); }
+
+    .subtitle {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+
+    .side-label {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 2px;
+      margin: 45px 0 15px;
+    }
+
+    .side-link {
+      display: block;
+      padding: 14px;
+      margin: 7px 0;
+      border-radius: 7px;
+      color: #c6c8ce;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .side-link:hover, .side-link.active {
+      background: #291519;
+      color: #ff6874;
+    }
+
+    .home-link {
+      display: inline-block;
+      margin-top: 25px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      padding: 35px;
+    }
+
+    h1 { font-size: 28px; margin: 0 0 10px; }
+    h2 { font-size: 17px; margin: 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .status {
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 10px 14px;
+      color: #ff6874;
+      font-size: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .stat, .panel, .login-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .stat { padding: 22px; }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .stat-number { font-size: 30px; font-weight: 700; }
+    .panel { padding: 25px; margin-bottom: 25px; }
+
+    .panel-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+    label { color: #c7c9d0; font-size: 12px; }
+
+    input, select, textarea {
+      width: 100%;
+      color: var(--white);
+      background: #0c0e13;
+      border: 1px solid #30333d;
+      border-radius: 7px;
+      padding: 13px;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--red);
+    }
+
+    input[type="file"] { cursor: pointer; }
+    textarea { min-height: 90px; resize: vertical; }
+
+    .photo-preview {
+      display: block;
+      width: 100%;
+      max-width: 360px;
+      max-height: 230px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 7px;
+      padding: 12px 17px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .btn:disabled { opacity: .6; cursor: wait; }
+    .btn-red { background: var(--red); color: white; }
+
+    .btn-dark {
+      background: var(--panel2);
+      color: white;
+      border: 1px solid var(--border);
+    }
+
+    .inventory-tools {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .inventory-tools input { flex: 1; min-width: 180px; }
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 650px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 15px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th { color: var(--muted); font-weight: 500; }
+
+    .pill {
+      display: inline-block;
+      border-radius: 30px;
+      padding: 6px 9px;
+      font-size: 11px;
+      background: #183126;
+      color: #72dfaa;
+    }
+
+    .pill.sold { background: #321b1d; color: #ff8991; }
+    .row-actions { display: flex; gap: 7px; }
+
+    .small-btn {
+      background: var(--panel2);
+      color: white;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 7px 9px;
+      font-size: 11px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 35px 10px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .notice {
+      padding: 14px;
+      background: #171b25;
+      border: 1px solid var(--border);
+      color: #c6c9d4;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .message.error { color: #ff8991; }
+    .message.success { color: #72dfaa; }
+    [hidden] { display: none !important; }
+
+    .login-wrap {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+    }
+
+    .login-card .brand { margin-bottom: 12px; }
+    .login-card h1 { font-size: 24px; margin: 25px 0 10px; }
+    .login-card form { display: grid; gap: 17px; }
+    .login-card .btn { width: 100%; margin-top: 5px; }
+
+    @media (max-width: 850px) {
+      aside { width: 190px; }
+      main { padding: 22px; }
+      .stats { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .layout { display: block; }
+      aside { width: 100%; padding: 20px; }
+      .side-label { margin-top: 20px; }
+      .home-link { margin-top: 12px; }
+      main { padding: 18px 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      h1 { font-size: 24px; }
+      .panel { padding: 17px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .login-card { padding: 23px; }
+    }
+  </style>
+</head>
+
+<body>
+  <section class="login-wrap" id="login-screen">
+    <div class="login-card">
+      <div class="brand">D <span>AUTOS</span></div>
+      <div class="subtitle">SECURE DEALERSHIP MANAGEMENT</div>
+
+      <h1>Welcome back.</h1>
+      <p class="muted">Sign in to manage your vehicle inventory.</p>
+
+      <form id="login-form">
+        <div class="field">
+          <label for="login-email">Admin email</label>
+          <input id="login-email" type="email" autocomplete="username"
+                 required placeholder="Your Supabase account email">
+        </div>
+
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password"
+                 autocomplete="current-password" required
+                 placeholder="Your account password">
+        </div>
+
+        <button class="btn btn-red" id="login-button" type="submit">Sign In</button>
+      </form>
+
+      <div class="message" id="login-message" role="status"></div>
+      <a class="home-link" href="index.html">← Back to D AUTOS website</a>
+    </div>
+  </section>
+
+  <div class="layout" id="dashboard" hidden>
+    <aside>
+      <div class="brand">D <span>AUTOS</span></div>
+      <div class="subtitle">DEALERSHIP MANAGEMENT</div>
+
+      <div class="side-label">WORKSPACE</div>
+      <a class="side-link active" href="#overview">▦ &nbsp; Dashboard</a>
+      <a class="side-link" href="#add-car">＋ &nbsp; Add a Car</a>
+      <a class="side-link" href="#inventory">▤ &nbsp; Inventory</a>
+
+      <a class="home-link" href="index.html">← View public website</a>
+      <button class="btn btn-dark" id="logout-button" type="button"
+              style="width:100%; margin-top:18px">Sign Out</button>
+    </aside>
+
+    <main>
+      <section class="topbar" id="overview">
+        <div>
+          <h1>Dashboard Overview</h1>
+          <div class="muted">Manage your D AUTOS vehicle inventory.</div>
+        </div>
+        <div class="status" id="connection-status">● Connecting</div>
+      </section>
+
+      <div class="notice">
+        Changes are saved to your Supabase database. Choose car photos directly
+        from your laptop. Your photo files are uploaded to Supabase Storage.
+      </div>
+
+      <section class="stats">
+        <div class="stat">
+          <div class="stat-label">TOTAL LISTINGS</div>
+          <div class="stat-number" id="total-count">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">AVAILABLE CARS</div>
+          <div class="stat-number" id="available-count">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">SOLD CARS</div>
+          <div class="stat-number" id="sold-count">0</div>
+        </div>
+      </section>
+
+      <section class="panel" id="add-car">
+        <div class="panel-heading">
+          <h2 id="form-title">Add a Vehicle</h2>
+          <span class="muted">Vehicle details</span>
+        </div>
+
+        <form id="car-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="make">Make *</label>
+              <input id="make" required placeholder="e.g. Mercedes-Benz">
+            </div>
+
+            <div class="field">
+              <label for="model">Model *</label>
+              <input id="model" required placeholder="e.g. C300">
+            </div>
+
+            <div class="field">
+              <label for="year">Year</label>
+              <input id="year" type="number" min="1900" max="2100"
+                     placeholder="e.g. 2020">
+            </div>
+
+            <div class="field">
+              <label for="mileage">Mileage (km)</label>
+              <input id="mileage" type="number" min="0"
+                     placeholder="e.g. 45000">
+            </div>
+
+            <div class="field">
+              <label for="price">Price (₦) *</label>
+              <input id="price" type="number" min="0" step="0.01"
+                     required placeholder="e.g. 18500000">
+            </div>
+
+            <div class="field">
+              <label for="status">Listing status</label>
+              <select id="status">
+                <option value="available">Available</option>
+                <option value="sold">Sold</option>
+              </select>
+            </div>
+
+            <div class="field full">
+              <label for="car-photo">Main car photo</label>
+              <input id="car-photo" type="file"
+                     accept="image/jpeg,image/png,image/webp,image/gif">
+              <div class="muted">
+                Choose a photo from your laptop. JPG, PNG, WEBP or GIF.
+                Maximum file size: 10 MB.
+              </div>
+              <img id="photo-preview" class="photo-preview"
+                   alt="Car photo preview" hidden>
+            </div>
+
+            <div class="field full">
+              <label for="description">Description</label>
+              <textarea id="description"
+                        placeholder="Describe the car, features and other details..."></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-red" type="submit" id="save-button">Add Vehicle</button>
+            <button class="btn btn-dark" type="button" id="cancel-edit" hidden>Cancel Edit</button>
+          </div>
+
+          <div class="message" id="form-message" role="status"></div>
+        </form>
+      </section>
+
+      <section class="panel" id="inventory">
+        <div class="panel-heading">
+          <h2>Your Inventory</h2>
+          <button class="btn btn-dark" id="refresh-button" type="button">Refresh</button>
+        </div>
+
+        <div class="inventory-tools">
+          <input id="search" type="search" placeholder="Search make or model...">
+          <select id="filter-status" aria-label="Filter inventory">
+            <option value="all">All listings</option>
+            <option value="available">Available</option>
+            <option value="sold">Sold</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>VEHICLE</th>
+                <th>YEAR</th>
+                <th>PRICE</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="car-list"></tbody>
+          </table>
+        </div>
+
+        <div class="empty" id="empty-message" hidden>No vehicles found.</div>
+        <div class="message" id="inventory-message" role="status"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    "use strict";
+
+    const SUPABASE_URL = "https://dofafacfjfonjhouluzp.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_4LU3Kj3mK0WDcZb0IJOdYw_2Kmpaw-O";
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const $ = (id) => document.getElementById(id);
+
+    const loginScreen = $("login-screen");
+    const dashboard = $("dashboard");
+    const loginForm = $("login-form");
+    const carForm = $("car-form");
+    const carList = $("car-list");
+    const photoInput = $("car-photo");
+    const photoPreview = $("photo-preview");
+    const PHOTO_BUCKET = "car-photos";
+
+    let cars = [];
+    let editingId = null;
+    let busy = false;
+    let currentImageURL = null;
+    let previewObjectURL = null;
+
+    function showMessage(id, text, type = "error") {
+      const element = $(id);
+      element.textContent = text;
+      element.className = "message" + (text ? " " + type : "");
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function formatPrice(price) {
+      return "₦" + Number(price || 0).toLocaleString("en-NG");
+    }
+
+    function setLoggedIn(isLoggedIn) {
+      loginScreen.hidden = isLoggedIn;
+      dashboard.hidden = !isLoggedIn;
+    }
+
+    function clearPhotoPreview() {
+      if (previewObjectURL) {
+        URL.revokeObjectURL(previewObjectURL);
+        previewObjectURL = null;
+      }
+      photoPreview.removeAttribute("src");
+      photoPreview.hidden = true;
+    }
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files[0];
+      clearPhotoPreview();
+
+      if (!file) return;
+
+      const allowedTypes = [
+        "image/jpeg", "image/png", "image/webp", "image/gif"
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        photoInput.value = "";
+        showMessage("form-message", "Choose a JPG, PNG, WEBP or GIF image.");
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        photoInput.value = "";
+        showMessage("form-message", "Your photo must be smaller than 10 MB.");
+        return;
+      }
+
+      previewObjectURL = URL.createObjectURL(file);
+      photoPreview.src = previewObjectURL;
+      photoPreview.hidden = false;
+      showMessage("form-message", "");
+    });
+
+    async function uploadCarPhoto(file) {
+      const extension = file.name.split(".").pop()
+        .toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+
+      const filePath = `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+      const { error } = await supabaseClient.storage
+        .from(PHOTO_BUCKET)
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type
+        });
+
+      if (error) {
+        throw new Error("Photo upload failed: " + error.message);
+      }
+
+      const { data } = supabaseClient.storage
+        .from(PHOTO_BUCKET)
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    }
+
+    async function signIn(event) {
+      event.preventDefault();
+      if (busy) return;
+
+      busy = true;
+      $("login-button").disabled = true;
+      $("login-button").textContent = "Signing in...";
+      showMessage("login-message", "");
+
+      try {
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email: $("login-email").value.trim(),
+          password: $("login-password").value
+        });
+
+        if (error) throw error;
+      } catch (error) {
+        showMessage("login-message", error.message || "Sign-in failed.");
+      } finally {
+        busy = false;
+        $("login-button").disabled = false;
+        $("login-button").textContent = "Sign In";
+      }
+    }
+
+    async function signOut() {
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        showMessage("inventory-message", error.message);
+        return;
+      }
+
+      cars = [];
+      renderCars();
+      resetForm();
+      setLoggedIn(false);
+    }
+
+    // FIX: Do not sort by "created", because that column does not exist.
+    async function loadCars() {
+      $("connection-status").textContent = "● Loading inventory";
+      showMessage("inventory-message", "");
+
+      const { data, error } = await supabaseClient
+        .from("cars")
+        .select("*");
+
+      if (error) {
+        $("connection-status").textContent = "● Database error";
+        showMessage("inventory-message", "Could not load cars: " + error.message);
+        return;
+      }
+
+      cars = data || [];
+      $("connection-status").textContent = "● Database connected";
+      renderCars();
+    }
+
+    function renderCars() {
+      const search = $("search").value.trim().toLowerCase();
+      const filter = $("filter-status").value;
+
+      const filtered = cars.filter((car) => {
+        const name = `${car.make || ""} ${car.model || ""}`.toLowerCase();
+        return name.includes(search) &&
+          (filter === "all" || car.status === filter);
+      });
+
+      carList.innerHTML = filtered.map((car) => `
+        <tr>
+          <td><strong>${escapeHTML(car.make)} ${escapeHTML(car.model)}</strong></td>
+          <td>${escapeHTML(car.year ?? "—")}</td>
+          <td>${formatPrice(car.price)}</td>
+          <td>
+            <span class="pill ${car.status === "sold" ? "sold" : ""}">
+              ${escapeHTML(car.status)}
+            </span>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="small-btn" data-action="edit" data-id="${escapeHTML(car.id)}">Edit</button>
+              <button class="small-btn" data-action="toggle" data-id="${escapeHTML(car.id)}">${car.status === "sold" ? "Available" : "Mark sold"}</button>
+              <button class="small-btn" data-action="delete" data-id="${escapeHTML(car.id)}">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      $("empty-message").hidden = filtered.length > 0;
+      $("total-count").textContent = cars.length;
+      $("available-count").textContent =
+        cars.filter((car) => car.status === "available").length;
+      $("sold-count").textContent =
+        cars.filter((car) => car.status === "sold").length;
+    }
+
+    function resetForm() {
+      carForm.reset();
+      editingId = null;
+      currentImageURL = null;
+      clearPhotoPreview();
+
+      $("form-title").textContent = "Add a Vehicle";
+      $("save-button").textContent = "Add Vehicle";
+      $("cancel-edit").hidden = true;
+      showMessage("form-message", "");
+    }
+
+    async function saveCar(event) {
+      event.preventDefault();
+      if (busy) return;
+
+      const make = $("make").value.trim();
+      const model = $("model").value.trim();
+      const priceText = $("price").value.trim();
+      const yearText = $("year").value.trim();
+      const mileageText = $("mileage").value.trim();
+
+      if (!make || !model || priceText === "" ||
+          !Number.isFinite(Number(priceText)) || Number(priceText) < 0) {
+        showMessage("form-message", "Enter a make, model and valid price.");
+        return;
+      }
+
+      if (yearText && !Number.isInteger(Number(yearText))) {
+        showMessage("form-message", "Enter a valid year.");
+        return;
+      }
+
+      if (mileageText &&
+          (!Number.isFinite(Number(mileageText)) || Number(mileageText) < 0)) {
+        showMessage("form-message", "Enter valid mileage.");
+        return;
+      }
+
+      const selectedPhoto = photoInput.files[0];
+      const wasEditing = editingId !== null;
+
+      const details = {
+        make,
+        model,
+        year: yearText ? Number(yearText) : null,
+        price: Number(priceText),
+        mileage: mileageText ? Number(mileageText) : null,
+        description: $("description").value.trim() || null,
+        image_url: currentImageURL || null,
+        status: $("status").value
+      };
+
+      busy = true;
+      $("save-button").disabled = true;
+      $("save-button").textContent = selectedPhoto ? "Uploading photo..." : "Saving...";
+      showMessage("form-message", "");
+
+      try {
+        if (selectedPhoto) {
+          currentImageURL = await uploadCarPhoto(selectedPhoto);
+          details.image_url = currentImageURL;
+        }
+
+        if (!wasEditing && !details.image_url) {
+          throw new Error("Please choose a photo for this vehicle.");
+        }
+
+        let result;
+
+        if (wasEditing) {
+          result = await supabaseClient
+            .from("cars")
+            .update(details)
+            .eq("id", editingId)
+            .select();
+        } else {
+          result = await supabaseClient
+            .from("cars")
+            .insert(details)
+            .select();
+        }
+
+        if (result.error) throw result.error;
+
+        if (!result.data || result.data.length === 0) {
+          throw new Error("No vehicle was saved. Check your admin permissions.");
+        }
+
+        resetForm();
+        await loadCars();
+
+        showMessage(
+          "inventory-message",
+          wasEditing ? "Vehicle updated successfully." : "Vehicle added successfully.",
+          "success"
+        );
+      } catch (error) {
+        showMessage("form-message", error.message || "Could not save vehicle.");
+      } finally {
+        busy = false;
+        $("save-button").disabled = false;
+        $("save-button").textContent =
+          editingId !== null ? "Save Changes" : "Add Vehicle";
+      }
+    }
+
+    async function handleCarAction(event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button || busy) return;
+
+      const car = cars.find((item) => String(item.id) === button.dataset.id);
+      if (!car) return;
+
+      const action = button.dataset.action;
+
+      if (action === "edit") {
+        editingId = car.id;
+        currentImageURL = car.image_url || null;
+
+        $("make").value = car.make || "";
+        $("model").value = car.model || "";
+        $("year").value = car.year ?? "";
+        $("mileage").value = car.mileage ?? "";
+        $("price").value = car.price ?? "";
+        $("description").value = car.description || "";
+        $("status").value = car.status || "available";
+
+        photoInput.value = "";
+        clearPhotoPreview();
+
+        if (currentImageURL) {
+          photoPreview.src = currentImageURL;
+          photoPreview.hidden = false;
+        }
+
+        $("form-title").textContent = "Edit Vehicle";
+        $("save-button").textContent = "Save Changes";
+        $("cancel-edit").hidden = false;
+        showMessage("form-message", "");
+        $("add-car").scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+
+      if (action === "toggle") {
+        const newStatus = car.status === "sold" ? "available" : "sold";
+
+        if (!confirm(`Change ${car.make} ${car.model} to "${newStatus}"?`)) return;
+
+        busy = true;
+        try {
+          const { error } = await supabaseClient
+            .from("cars")
+            .update({ status: newStatus })
+            .eq("id", car.id);
+
+          if (error) throw error;
+          await loadCars();
+        } catch (error) {
+          showMessage("inventory-message", error.message);
+        } finally {
+          busy = false;
+        }
+      }
+
+      if (action === "delete") {
+        if (!confirm(`Permanently delete ${car.make} ${car.model}?`)) return;
+
+        busy = true;
+        try {
+          const { error } = await supabaseClient
+            .from("cars")
+            .delete()
+            .eq("id", car.id);
+
+          if (error) throw error;
+
+          if (String(editingId) === String(car.id)) resetForm();
+
+          await loadCars();
+          showMessage("inventory-message", "Vehicle deleted.", "success");
+        } catch (error) {
+          showMessage("inventory-message", error.message);
+        } finally {
+          busy = false;
+        }
+      }
+    }
+
+    loginForm.addEventListener("submit", signIn);
+    carForm.addEventListener("submit", saveCar);
+    carList.addEventListener("click", handleCarAction);
+    $("cancel-edit").addEventListener("click", resetForm);
+    $("logout-button").addEventListener("click", signOut);
+    $("refresh-button").addEventListener("click", loadCars);
+    $("search").addEventListener("input", renderCars);
+    $("filter-status").addEventListener("change", renderCars);
+
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      setLoggedIn(Boolean(session));
+
+      if (session) {
+        setTimeout(() => loadCars(), 0);
+      } else {
+        cars = [];
+        renderCars();
+      }
+    });
+
+    (async function initialise() {
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error) {
+        showMessage("login-message", error.message);
+        return;
+      }
+
+      setLoggedIn(Boolean(data.session));
+
+      if (data.session) {
+        await loadCars();
+      }
+    })();
+  </script>
+</body>
+</html>
