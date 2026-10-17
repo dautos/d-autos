@@ -234,6 +234,8 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative;
+      cursor: zoom-in;
     }
 
     .car-image img {
@@ -244,6 +246,95 @@
     }
 
     .car-card:hover .car-image img { transform: scale(1.04); }
+
+    .gallery-hint {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      border-radius: 5px;
+      padding: 5px 8px;
+      background: rgba(0, 0, 0, .72);
+      color: white;
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .gallery-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(4, 5, 8, .94);
+    }
+
+    .gallery-modal[hidden] { display: none; }
+
+    .gallery-content {
+      position: relative;
+      width: min(100%, 1100px);
+      height: min(86vh, 780px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-main-image {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .gallery-close, .gallery-arrow {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      color: white;
+      background: rgba(20,20,24,.82);
+      cursor: pointer;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .gallery-close { top: 8px; right: 8px; z-index: 2; }
+    .gallery-arrow { top: 50%; transform: translateY(-50%); }
+    .gallery-prev { left: 8px; }
+    .gallery-next { right: 8px; }
+
+    .gallery-counter {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 7px 12px;
+      border-radius: 18px;
+      color: white;
+      background: rgba(0,0,0,.72);
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    body.gallery-open { overflow: hidden; }
+
+    @media (max-width: 600px) {
+      .gallery-modal { padding: 10px; }
+      .gallery-content { width: 100%; height: 82vh; }
+      .gallery-arrow { width: 40px; height: 40px; }
+      .gallery-prev { left: 2px; }
+      .gallery-next { right: 2px; }
+      .gallery-close { top: 4px; right: 4px; }
+    }
 
     .image-placeholder {
       color: var(--muted);
@@ -451,6 +542,20 @@
     <p>© <span id="year"></span> D AUTOS. All rights reserved.</p>
   </footer>
 
+  <div id="gallery-modal" class="gallery-modal" role="dialog"
+       aria-modal="true" aria-label="Vehicle photo gallery" hidden>
+    <div class="gallery-content">
+      <button id="gallery-close" class="gallery-close" type="button"
+              aria-label="Close gallery">×</button>
+      <button id="gallery-prev" class="gallery-arrow gallery-prev" type="button"
+              aria-label="Previous photo">‹</button>
+      <img id="gallery-main-image" class="gallery-main-image" alt="">
+      <button id="gallery-next" class="gallery-arrow gallery-next" type="button"
+              aria-label="Next photo">›</button>
+      <span id="gallery-counter" class="gallery-counter">1 / 1</span>
+    </div>
+  </div>
+
   <!-- Load Supabase BEFORE the code that uses it. -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -480,6 +585,94 @@
     let supabaseClient = null;
     let allCars = [];
     let loadRequestNumber = 0;
+    let activeGalleryURLs = [];
+    let activeGalleryIndex = 0;
+    let galleryLastFocus = null;
+    let galleryTouchStartX = null;
+
+    const galleryModal = document.getElementById("gallery-modal");
+    const galleryImage = document.getElementById("gallery-main-image");
+    const galleryCounter = document.getElementById("gallery-counter");
+    const galleryPrev = document.getElementById("gallery-prev");
+    const galleryNext = document.getElementById("gallery-next");
+    const galleryClose = document.getElementById("gallery-close");
+
+    function normaliseGalleryURLs(car) {
+      let gallery = car && car.gallery_urls;
+      if (typeof gallery === "string") {
+        try { gallery = JSON.parse(gallery); } catch (_) { gallery = []; }
+      }
+      if (!Array.isArray(gallery)) gallery = [];
+      const urls = [];
+      [car && car.image_url, ...gallery].forEach((url) => {
+        if (typeof url === "string" && url.trim() && !urls.includes(url.trim())) {
+          urls.push(url.trim());
+        }
+      });
+      return urls;
+    }
+
+    function renderGalleryImage() {
+      if (!activeGalleryURLs.length) return;
+      galleryImage.src = activeGalleryURLs[activeGalleryIndex];
+      galleryImage.alt = "Vehicle photo " + (activeGalleryIndex + 1);
+      galleryCounter.textContent = (activeGalleryIndex + 1) + " / " + activeGalleryURLs.length;
+      const multiple = activeGalleryURLs.length > 1;
+      galleryPrev.hidden = !multiple;
+      galleryNext.hidden = !multiple;
+      galleryCounter.hidden = !multiple;
+    }
+
+    function openGallery(car, focusElement) {
+      const urls = normaliseGalleryURLs(car);
+      if (!urls.length) return;
+      activeGalleryURLs = urls;
+      activeGalleryIndex = 0;
+      galleryLastFocus = focusElement || document.activeElement;
+      renderGalleryImage();
+      galleryModal.hidden = false;
+      document.body.classList.add("gallery-open");
+      galleryClose.focus();
+    }
+
+    function closeGallery() {
+      galleryModal.hidden = true;
+      document.body.classList.remove("gallery-open");
+      galleryImage.removeAttribute("src");
+      activeGalleryURLs = [];
+      if (galleryLastFocus && typeof galleryLastFocus.focus === "function") {
+        galleryLastFocus.focus();
+      }
+    }
+
+    function moveGallery(direction) {
+      if (activeGalleryURLs.length < 2) return;
+      activeGalleryIndex = (activeGalleryIndex + direction + activeGalleryURLs.length) % activeGalleryURLs.length;
+      renderGalleryImage();
+    }
+
+    galleryClose.addEventListener("click", closeGallery);
+    galleryPrev.addEventListener("click", () => moveGallery(-1));
+    galleryNext.addEventListener("click", () => moveGallery(1));
+    galleryModal.addEventListener("click", (event) => {
+      if (event.target === galleryModal) closeGallery();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (galleryModal.hidden) return;
+      if (event.key === "Escape") closeGallery();
+      if (event.key === "ArrowLeft") moveGallery(-1);
+      if (event.key === "ArrowRight") moveGallery(1);
+    });
+    galleryModal.addEventListener("touchstart", (event) => {
+      galleryTouchStartX = event.changedTouches[0]?.clientX ?? null;
+    }, { passive: true });
+    galleryModal.addEventListener("touchend", (event) => {
+      if (galleryTouchStartX === null) return;
+      const endX = event.changedTouches[0]?.clientX;
+      const delta = endX - galleryTouchStartX;
+      galleryTouchStartX = null;
+      if (Math.abs(delta) > 45) moveGallery(delta < 0 ? 1 : -1);
+    }, { passive: true });
 
     function showNotice(title, message, errorDetails = "", showRetry = true) {
       noticeTitle.textContent = title;
@@ -525,10 +718,16 @@
 
       const imageArea = document.createElement("div");
       imageArea.className = "car-image";
+      imageArea.setAttribute("role", "button");
+      imageArea.tabIndex = 0;
+      imageArea.setAttribute("aria-label", "Open photos for " + [
+        safeText(car.year), safeText(car.make), safeText(car.model)
+      ].filter(Boolean).join(" "));
 
-      if (car.image_url) {
+      const galleryURLs = normaliseGalleryURLs(car);
+      if (galleryURLs.length) {
         const img = document.createElement("img");
-        img.src = car.image_url;
+        img.src = galleryURLs[0];
         img.alt = [
           safeText(car.year),
           safeText(car.make),
@@ -542,8 +741,24 @@
         }, { once: true });
 
         imageArea.appendChild(img);
+        if (galleryURLs.length > 1) {
+          const hint = document.createElement("span");
+          hint.className = "gallery-hint";
+          hint.textContent = galleryURLs.length + " photos · View";
+          imageArea.appendChild(hint);
+        }
+
+        imageArea.addEventListener("click", () => openGallery(car, imageArea));
+        imageArea.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openGallery(car, imageArea);
+          }
+        });
       } else {
         imageArea.appendChild(createPlaceholder("Image coming soon"));
+        imageArea.removeAttribute("role");
+        imageArea.removeAttribute("tabindex");
       }
 
       const info = document.createElement("div");
@@ -717,7 +932,7 @@
         // Do not request or sort by the nonexistent "created" column.
         const { data, error } = await supabaseClient
           .from("cars")
-          .select("id, make, model, year, price, mileage, description, image_url, status")
+          .select("id, make, model, year, price, mileage, description, image_url, gallery_urls, status")
           .eq("status", "available");
 
         if (error) throw error;
