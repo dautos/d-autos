@@ -364,6 +364,7 @@
       <a class="side-link active" href="#overview">▦ &nbsp; Dashboard</a>
       <a class="side-link" href="#add-car">＋ &nbsp; Add a Car</a>
       <a class="side-link" href="#inventory">▤ &nbsp; Inventory</a>
+      <a class="side-link" href="#admin-management">♙ &nbsp; Admin Management</a>
 
       <a class="home-link" href="index.html">← View public website</a>
       <button class="btn btn-dark" id="logout-button" type="button"
@@ -504,6 +505,57 @@
         <div class="empty" id="empty-message" hidden>No vehicles found.</div>
         <div class="message" id="inventory-message" role="status"></div>
       </section>
+
+      <!-- NEW: ADMIN MANAGEMENT -->
+      <section class="panel" id="admin-management">
+        <div class="panel-heading">
+          <h2>Admin Management</h2>
+          <span class="muted">Manage dealership staff</span>
+        </div>
+
+        <div class="notice">
+          Create a separate login for a staff member. They can use the same
+          D AUTOS admin website with their own Gmail and password.
+        </div>
+
+        <form id="admin-form">
+          <div class="form-grid">
+            <div class="field full">
+              <label for="staff-email">Staff Gmail *</label>
+              <input
+                id="staff-email"
+                type="email"
+                required
+                autocomplete="off"
+                placeholder="staff@gmail.com"
+              >
+            </div>
+
+            <div class="field full">
+              <label for="staff-password">Initial Password *</label>
+              <input
+                id="staff-password"
+                type="password"
+                required
+                minlength="8"
+                autocomplete="new-password"
+                placeholder="At least 8 characters"
+              >
+            </div>
+          </div>
+
+          <div class="actions">
+            <button
+              class="btn btn-red"
+              id="create-admin-button"
+              type="submit"
+            >Add Admin</button>
+          </div>
+
+          <div class="message" id="admin-message" role="status"></div>
+        </form>
+      </section>
+      <!-- END ADMIN MANAGEMENT -->
     </main>
   </div>
 
@@ -537,6 +589,7 @@
     let busy = false;
     let currentImageURL = null;
     let previewObjectURL = null;
+    let adminBusy = false;
 
     function showMessage(id, text, type = "error") {
       const element = $(id);
@@ -911,14 +964,110 @@
       }
     }
 
+    // NEW: Create a staff admin through the secure Supabase Edge Function.
+    async function createAdmin(event) {
+      event.preventDefault();
+
+      if (adminBusy || busy) return;
+
+      const email = $("staff-email").value.trim().toLowerCase();
+      const password = $("staff-password").value;
+
+      if (!email.endsWith("@gmail.com")) {
+        showMessage("admin-message", "Please enter a Gmail address.");
+        return;
+      }
+
+      if (password.length < 8) {
+        showMessage(
+          "admin-message",
+          "The password must contain at least 8 characters."
+        );
+        return;
+      }
+
+      adminBusy = true;
+
+      const button = $("create-admin-button");
+      button.disabled = true;
+      button.textContent = "Creating account...";
+      showMessage("admin-message", "");
+
+      try {
+        const { data: sessionData, error: sessionError } =
+          await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (!sessionData.session) {
+          throw new Error("Please sign in again before adding staff.");
+        }
+
+        const { data, error } =
+          await supabaseClient.functions.invoke("add-admin", {
+            body: { email, password }
+          });
+
+        if (error) {
+          let message = error.message || "Could not create the account.";
+
+          try {
+            if (error.context &&
+                typeof error.context.json === "function") {
+              const response = await error.context.json();
+              message = response.error || response.message || message;
+            }
+          } catch (_) {}
+
+          throw new Error(message);
+        }
+
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
+
+        $("admin-form").reset();
+
+        showMessage(
+          "admin-message",
+          "Staff account created successfully.",
+          "success"
+        );
+      } catch (error) {
+        showMessage(
+          "admin-message",
+          error.message || "Could not create the staff account."
+        );
+      } finally {
+        adminBusy = false;
+        button.disabled = false;
+        button.textContent = "Add Admin";
+      }
+    }
+
     loginForm.addEventListener("submit", signIn);
     carForm.addEventListener("submit", saveCar);
     carList.addEventListener("click", handleCarAction);
+
+    // NEW: Connect the Admin Management form.
+    $("admin-form").addEventListener("submit", createAdmin);
+
     $("cancel-edit").addEventListener("click", resetForm);
     $("logout-button").addEventListener("click", signOut);
     $("refresh-button").addEventListener("click", loadCars);
     $("search").addEventListener("input", renderCars);
     $("filter-status").addEventListener("change", renderCars);
+
+    // NEW: Highlight the selected sidebar section.
+    document.querySelectorAll("aside .side-link").forEach((link) => {
+      link.addEventListener("click", () => {
+        document.querySelectorAll("aside .side-link").forEach((item) => {
+          item.classList.remove("active");
+        });
+
+        link.classList.add("active");
+      });
+    });
 
     supabaseClient.auth.onAuthStateChange((event, session) => {
       setLoggedIn(Boolean(session));
