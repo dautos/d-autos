@@ -174,16 +174,59 @@
     input[type="file"] { cursor: pointer; }
     textarea { min-height: 90px; resize: vertical; }
 
-    .photo-preview {
+    .photo-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .photo-item {
+      min-width: 0;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #0c0e13;
+    }
+
+    .photo-item.is-cover { border-color: var(--red); }
+
+    .photo-item img {
       display: block;
       width: 100%;
-      max-width: 360px;
-      max-height: 230px;
+      height: 110px;
       object-fit: cover;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-top: 8px;
+      border-radius: 6px;
+      background: #17191f;
     }
+
+    .photo-item-label {
+      display: block;
+      margin: 8px 0;
+      color: #c7c9d0;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .photo-item-buttons { display: flex; gap: 6px; }
+
+    .photo-item-buttons button {
+      flex: 1;
+      border: 1px solid #3b3e48;
+      border-radius: 5px;
+      padding: 7px 5px;
+      background: #191c23;
+      color: #f5f5f7;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .photo-item.is-cover .cover-button {
+      background: var(--red);
+      border-color: var(--red);
+    }
+
+    .photo-item-buttons .remove-photo { color: #ffaaaa; }
 
     .actions {
       display: flex;
@@ -445,15 +488,16 @@
             </div>
 
             <div class="field full">
-              <label for="car-photo">Main car photo</label>
-              <input id="car-photo" type="file"
+              <label for="car-photos">Car photos</label>
+              <input id="car-photos" type="file" multiple
                      accept="image/jpeg,image/png,image/webp,image/gif">
               <div class="muted">
-                Choose a photo from your laptop. JPG, PNG, WEBP or GIF.
-                Maximum file size: 10 MB.
+                Select several photos at once. The first photo is the cover;
+                you can choose a different cover or remove photos below.
+                JPG, PNG, WEBP or GIF. Maximum 10 MB per photo.
               </div>
-              <img id="photo-preview" class="photo-preview"
-                   alt="Car photo preview" hidden>
+              <div id="photo-preview-grid" class="photo-preview-grid"
+                   aria-live="polite"></div>
             </div>
 
             <div class="field full">
@@ -580,15 +624,15 @@
     const loginForm = $("login-form");
     const carForm = $("car-form");
     const carList = $("car-list");
-    const photoInput = $("car-photo");
-    const photoPreview = $("photo-preview");
+    const photoInput = $("car-photos");
+    const photoPreviewGrid = $("photo-preview-grid");
     const PHOTO_BUCKET = "car-photos";
 
     let cars = [];
     let editingId = null;
     let busy = false;
-    let currentImageURL = null;
-    let previewObjectURL = null;
+    let photoItems = [];
+    let coverPhotoId = null;
     let adminBusy = false;
 
     function showMessage(id, text, type = "error") {
@@ -616,41 +660,130 @@
       dashboard.hidden = !isLoggedIn;
     }
 
-    function clearPhotoPreview() {
-      if (previewObjectURL) {
-        URL.revokeObjectURL(previewObjectURL);
-        previewObjectURL = null;
+    function clearPhotoItems() {
+      photoItems.forEach((item) => {
+        if (item.file && item.url) URL.revokeObjectURL(item.url);
+      });
+      photoItems = [];
+      coverPhotoId = null;
+      photoInput.value = "";
+      renderPhotoPreviews();
+    }
+
+    function normaliseGalleryURLs(car) {
+      let gallery = car && car.gallery_urls;
+      if (typeof gallery === "string") {
+        try { gallery = JSON.parse(gallery); } catch (_) { gallery = []; }
       }
-      photoPreview.removeAttribute("src");
-      photoPreview.hidden = true;
+      if (!Array.isArray(gallery)) gallery = [];
+
+      const urls = [];
+      [car && car.image_url, ...gallery].forEach((value) => {
+        if (typeof value === "string" && value.trim() && !urls.includes(value.trim())) {
+          urls.push(value.trim());
+        }
+      });
+      return urls;
+    }
+
+    function loadPhotoItemsForCar(car) {
+      clearPhotoItems();
+      photoItems = normaliseGalleryURLs(car).map((url, index) => ({
+        id: "saved-" + index + "-" + Math.random().toString(36).slice(2),
+        file: null,
+        url,
+        saved: true
+      }));
+      coverPhotoId = photoItems[0]?.id || null;
+      renderPhotoPreviews();
+    }
+
+    function renderPhotoPreviews() {
+      photoPreviewGrid.replaceChildren();
+
+      photoItems.forEach((item, index) => {
+        const isCover = item.id === coverPhotoId;
+        const tile = document.createElement("div");
+        tile.className = "photo-item" + (isCover ? " is-cover" : "");
+
+        const img = document.createElement("img");
+        img.src = item.url;
+        img.alt = "Car photo " + (index + 1);
+        img.loading = "lazy";
+
+        const label = document.createElement("span");
+        label.className = "photo-item-label";
+        label.textContent = isCover ? "Cover photo" : "Photo " + (index + 1);
+
+        const buttons = document.createElement("div");
+        buttons.className = "photo-item-buttons";
+
+        const coverButton = document.createElement("button");
+        coverButton.type = "button";
+        coverButton.className = "cover-button";
+        coverButton.dataset.photoAction = "cover";
+        coverButton.dataset.photoId = item.id;
+        coverButton.textContent = isCover ? "Cover selected" : "Set as cover";
+        coverButton.disabled = isCover;
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className = "remove-photo";
+        removeButton.dataset.photoAction = "remove";
+        removeButton.dataset.photoId = item.id;
+        removeButton.textContent = "Remove";
+
+        buttons.append(coverButton, removeButton);
+        tile.append(img, label, buttons);
+        photoPreviewGrid.appendChild(tile);
+      });
     }
 
     photoInput.addEventListener("change", () => {
-      const file = photoInput.files[0];
-      clearPhotoPreview();
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      const files = Array.from(photoInput.files || []);
+      photoInput.value = "";
+      let added = 0;
 
-      if (!file) return;
+      for (const file of files) {
+        if (!allowedTypes.includes(file.type)) {
+          showMessage("form-message", file.name + ": choose JPG, PNG, WEBP or GIF.");
+          continue;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          showMessage("form-message", file.name + ": maximum size is 10 MB.");
+          continue;
+        }
 
-      const allowedTypes = [
-        "image/jpeg", "image/png", "image/webp", "image/gif"
-      ];
-
-      if (!allowedTypes.includes(file.type)) {
-        photoInput.value = "";
-        showMessage("form-message", "Choose a JPG, PNG, WEBP or GIF image.");
-        return;
+        const item = {
+          id: "new-" + crypto.randomUUID(),
+          file,
+          url: URL.createObjectURL(file),
+          saved: false
+        };
+        photoItems.push(item);
+        if (!coverPhotoId) coverPhotoId = item.id;
+        added++;
       }
 
-      if (file.size > 10 * 1024 * 1024) {
-        photoInput.value = "";
-        showMessage("form-message", "Your photo must be smaller than 10 MB.");
-        return;
-      }
+      renderPhotoPreviews();
+      if (added) showMessage("form-message", "");
+    });
 
-      previewObjectURL = URL.createObjectURL(file);
-      photoPreview.src = previewObjectURL;
-      photoPreview.hidden = false;
-      showMessage("form-message", "");
+    photoPreviewGrid.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-photo-action]");
+      if (!button) return;
+      const item = photoItems.find((photo) => photo.id === button.dataset.photoId);
+      if (!item) return;
+
+      if (button.dataset.photoAction === "cover") {
+        coverPhotoId = item.id;
+      } else if (button.dataset.photoAction === "remove") {
+        if (item.file && item.url) URL.revokeObjectURL(item.url);
+        photoItems = photoItems.filter((photo) => photo.id !== item.id);
+        if (coverPhotoId === item.id) coverPhotoId = photoItems[0]?.id || null;
+      }
+      renderPhotoPreviews();
     });
 
     async function uploadCarPhoto(file) {
@@ -778,8 +911,7 @@
     function resetForm() {
       carForm.reset();
       editingId = null;
-      currentImageURL = null;
-      clearPhotoPreview();
+      clearPhotoItems();
 
       $("form-title").textContent = "Add a Vehicle";
       $("save-button").textContent = "Add Vehicle";
@@ -814,7 +946,6 @@
         return;
       }
 
-      const selectedPhoto = photoInput.files[0];
       const wasEditing = editingId !== null;
 
       const details = {
@@ -824,24 +955,41 @@
         price: Number(priceText),
         mileage: mileageText ? Number(mileageText) : null,
         description: $("description").value.trim() || null,
-        image_url: currentImageURL || null,
+        image_url: null,
+        gallery_urls: [],
         status: $("status").value
       };
 
+      if (!photoItems.length) {
+        showMessage("form-message", "Please add at least one photo for this vehicle.");
+        return;
+      }
+
       busy = true;
       $("save-button").disabled = true;
-      $("save-button").textContent = selectedPhoto ? "Uploading photo..." : "Saving...";
+      $("save-button").textContent = photoItems.some((item) => item.file)
+        ? "Uploading photos..." : "Saving...";
       showMessage("form-message", "");
 
       try {
-        if (selectedPhoto) {
-          currentImageURL = await uploadCarPhoto(selectedPhoto);
-          details.image_url = currentImageURL;
+        const uploadedById = new Map();
+
+        for (const item of photoItems) {
+          const url = item.file ? await uploadCarPhoto(item.file) : item.url;
+          uploadedById.set(item.id, url);
         }
 
-        if (!wasEditing && !details.image_url) {
-          throw new Error("Please choose a photo for this vehicle.");
-        }
+        const coverItem = photoItems.find((item) => item.id === coverPhotoId) || photoItems[0];
+        const coverURL = uploadedById.get(coverItem.id);
+        const orderedURLs = [
+          coverURL,
+          ...photoItems
+            .filter((item) => item.id !== coverItem.id)
+            .map((item) => uploadedById.get(item.id))
+        ].filter((url, index, list) => url && list.indexOf(url) === index);
+
+        details.image_url = coverURL;
+        details.gallery_urls = orderedURLs;
 
         let result;
 
@@ -893,7 +1041,6 @@
 
       if (action === "edit") {
         editingId = car.id;
-        currentImageURL = car.image_url || null;
 
         $("make").value = car.make || "";
         $("model").value = car.model || "";
@@ -903,13 +1050,7 @@
         $("description").value = car.description || "";
         $("status").value = car.status || "available";
 
-        photoInput.value = "";
-        clearPhotoPreview();
-
-        if (currentImageURL) {
-          photoPreview.src = currentImageURL;
-          photoPreview.hidden = false;
-        }
+        loadPhotoItemsForCar(car);
 
         $("form-title").textContent = "Edit Vehicle";
         $("save-button").textContent = "Save Changes";
